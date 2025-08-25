@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light">
+  <title>AlphaHire Recruiting Operations Roadmap and KPIs (Standalone)</title>
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#0F172A; --muted:#6B7280; --border:#E5E7EB;
+      --brand:#037AC9; --brand2:#F9A935;
+      --card:#ffffff; --shadow:0 8px 24px rgba(2,6,23,0.06);
+    }
+    html,body{margin:0;padding:0;background:var(--bg)!important;color:var(--fg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;color-scheme:light}
+    /* Force white bg even in fullscreen/dark environments */
+    :fullscreen { background:#ffffff !important; }
+    :-webkit-full-screen { background:#ffffff !important; }
+    body:-webkit-full-screen { background:#ffffff !important; }
+    body:fullscreen { background:#ffffff !important; }
+
+    .container{max-width:min(1920px,96vw);margin:0 auto;padding:32px 20px 80px;}
+    h1{margin:0 0 4px;font-size:28px;}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .pill{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted)}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;box-shadow:var(--shadow)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn:hover{background:#F8FAFC}
+    .icon{width:16px;height:16px;display:inline-block}
+    .controls{position:sticky;top:0;background:#ffffffE6;border-bottom:1px solid var(--border);backdrop-filter:blur(4px);padding:12px 6px;margin: -12px -6px 16px;border-radius:0 0 14px 14px;z-index:10}
+
+    .switch{position:relative;display:inline-block;width:38px;height:22px}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#e5e7eb;border-radius:999px;transition:.2s}
+    .slider:before{content:"";position:absolute;height:18px;width:18px;left:2px;top:2px;background:white;border:1px solid #d1d5db;border-radius:50%;transition:.2s}
+    .switch input:checked + .slider{background:#c7e0f6}
+    .switch input:checked + .slider:before{transform:translateX(16px)}
+
+    .grid{display:grid;gap:12px}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
+    .card-h{padding:26px 14px 8px;border-bottom:1px solid var(--border)} /* extra top padding to clear dot */
+    .card-t{margin:0;font-size:14px}
+    .card-c{padding:12px 14px}
+    .card.phase{overflow:visible} /* avoid clipping the dot */
+
+    .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;padding:3px 8px;font-size:12px;color:var(--muted)}
+
+    .timeline{position:relative;overflow:visible}
+    .timeline::before{content:"";position:absolute;left:0;right:0;top:28px;height:2px;background:#E5E7EB}
+    .strip{display:flex;gap:12px;flex-wrap:wrap;overflow:visible;padding:16px 0} /* wraps to screen width */
+    .phy{flex:1 1 420px;min-width:380px}
+    .phy.compact{flex:1 1 320px;min-width:320px}
+
+    .phase{position:relative}
+    .dotwrap{position:absolute;left:50%;top:-22px;transform:translateX(-50%);z-index:2}
+    .dot{height:40px;width:40px;border-radius:999px;border:2px solid rgba(255,255,255,.9);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;color:#fff}
+
+    .list{margin:6px 0 0 18px}
+    .list li{margin:6px 0}
+    .itm{display:flex;gap:8px;align-items:flex-start}
+    .itm input[type="text"]{flex:1;border:1px solid var(--border);padding:6px 8px;border-radius:8px}
+    .itm .btn{padding:6px 8px;border-radius:8px}
+
+    .hl{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:12px;padding:16px}
+
+    .export-safe, .export-safe *{color:#0F172A !important;background:#ffffff !important;border-color:#E5E7EB !important;box-shadow:none !important;background-image:none !important;filter:none !important}
+    /* No font-size bump in presenter mode */
+    .fake-fullscreen{position:fixed;inset:0;background:#fff;z-index:9999;overflow:auto}
+
+    @media (max-width:1200px){.phy{flex:1 1 50%;min-width:360px}}
+    @media (max-width:800px){.phy,.phy.compact{flex:1 1 100%;min-width:100%}}
+    @media print{.controls,.print-hide{display:none!important}.export-safe, .export-safe *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style>
+</head>
+<body>
+<noscript>
+  <div style="padding:16px;font-family:system-ui,Segoe UI,Arial">
+    This page requires JavaScript to render the roadmap. Please enable JavaScript.
+  </div>
+</noscript>
+<div id="app" class="container"></div>
+
+<!-- libs (work over file://) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+/* ===== Utility / Error surfacing so you never see a blank page ===== */
+window.addEventListener('error', function (e) {
+  const el = document.getElementById('app');
+  if (el) {
+    el.innerHTML = '<div style="padding:16px;border:1px solid #E5E7EB;border-radius:12px;background:#fff;color:#0F172A">' +
+      '<h2 style="margin:0 0 8px">Something went wrong</h2>' +
+      '<div style="color:#6B7280">Check the console (F12) for details.</div>' +
+      '<pre style="margin-top:12px;white-space:pre-wrap;font-size:12px;background:#F9FAFB;padding:12px;border-radius:8px">' + (e.error && e.error.stack ? e.error.stack : (e.message||'Unknown error')) + '</pre>' +
+      '</div>';
+  }
+});
+
+(function(){
+  const STORAGE_KEY = 'roadmap_phases_v9_plain_html';
+  const EXTRAS_KEY  = 'roadmap_extras_v9_plain_html';
+  const TITLE_KEY   = 'roadmap_title_v1_plain_html';
+  const HEADINGS_KEY= 'roadmap_headings_v2_plain_html';
+
+  const qs = (s, r=document)=>r.querySelector(s);
+  const params = new URLSearchParams(location.search);
+  const getBool = (k, d)=> (params.get(k)===null? d : /(1|true)/i.test(params.get(k)));
+  const setParams = (updates)=>{ try{ const p=new URLSearchParams(location.search); Object.entries(updates).forEach(([k,v])=>p.set(k, v? '1':'0')); history.replaceState(null,'',location.pathname+'?'+p.toString()+location.hash); }catch{} };
+  const stringify = (o)=> JSON.stringify(o,null,2);
+
+  /* Icons (inline SVG) */
+  const ICONS = {
+    zap:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+    calendar:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+    gauge:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>`,
+    bar:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`,
+    download:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+    full:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>`,
+    link:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+    plus:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+    trash:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+    up:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
+    down:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+    save:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V7l4-4h9l4 4v12a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
+    upload:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+    undo:`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/></svg>`
+  };
+
+  /* === Editable headings (cards + extras) === */
+  const HEADS_DEFAULT = {
+    objectives: "Objectives",
+    actions: "Key Actions",
+    deliverables: "Deliverables",
+    artifacts: "Artifacts & Templates",
+    owners: "Ownership (RACI-style)",
+    slas: "SLAs & Guardrails",
+    systems: "Systems & Integrations",
+    training: "Training & Change Mgmt",
+    kpis: "KPIs",
+    milestones: "Milestones",
+    successTitle: "Success Criteria at 6 Months",
+    risksTitle: "Risks & Mitigations",
+    metricsTitle: "Metrics Dictionary & Targets",
+    activityTitle: "Activity",
+    qualityTitle: "Quality & Outcomes",
+    efficiencyTitle: "Efficiency",
+    hygieneTitle: "Data Hygiene"
+  };
+
+  /* === Phase data template === */
+  const TEMPLATE = [
+    {"id":"p30","iconKey":"zap","window":"0–30 Days","label":"Foundation & Quick Wins","gradient":"linear-gradient(135deg, #3B82F6, #06B6D4)",
+     "objectives":["Establish structure and controls for recruiter ops","Launch essential automations to cut manual work","Capture baseline activity metrics (submittals, interviews, fills)"],
+     "actions":["Validate recruiter roster; map coverage gaps by industry/skill","Stand up comms rhythm: daily recruiter standups; weekly AM syncs","Rebuild and lock down #1 Jobs List (roles, owners, SLAs, permissions via Google Groups)","Integrate Polymer → Slack + central Sheet via Zapier; publish Google Form for submittals","Define data dictionary for Sheet fields (required, format, owner); Apps Script validations","Create baseline metric capture (weeks 1–4): submittals, screens, IVs, offers, starts","Triage top 20 open reqs into \"#1 Jobs\" with target SLAs"],
+     "deliverables":["#1 Jobs List v2.0 with access controls","Recruiter Coverage Map (by industry/role)","Baseline Metrics Snapshot (weeks 1–4)","Zapier Automation v1: Jobs (Polymer) → Slack + Sheets; Form → Sheets"],
+     "artifacts":["Data Dictionary & Field Validation Rules (Apps Script)","Recruiter Daily Standup Template","AM Weekly Pipeline Review Template","Zapier Flow Map (diagram)"],
+     "owners":["Ops Lead: tooling, permissions, data model","AMs: priority confirmation, client context","Recruiters: daily updates, submittal hygiene"],
+     "slas":["Req intake to live in system ≤ 24h","#1 Job first slate within 72h","Candidate submittal form completion rate ≥ 95%"],
+     "systems":["Polymer (job source)","Slack (real-time alerts)","Google Sheets (ATS-lite tracker)","Google Forms (candidate submittals)","Zapier (Automation v1: Jobs→Slack+Sheet, Form→Sheet)","Apps Script (optional: data validation & cleanup)"],
+     "training":["15-min micro-trainings: Submittal Form, #1 Jobs hygiene, Slack alerts","Zapier 101: viewing & troubleshooting task runs","Open office hours 2x/week for first month"],
+     "milestones":["Week 1: Access, audit, rebuild plan approved","Week 2: Zapier automations live; comms cadence running","Week 4: Baseline metrics captured; #1 Jobs stable"],
+     "kpis":["100% roster validated with clear assignments","#1 Jobs List rebuilt with permissioning","≥80% of new reqs flow automatically to Slack + Sheet","Baseline activity captured and documented"]},
+    {"id":"p60","iconKey":"calendar","window":"31–60 Days","label":"Implementation & Process Control","gradient":"linear-gradient(135deg, #8B5CF6, #D946EF)",
+     "objectives":["Standardize submission workflow and accountability","Accelerate speed-to-client with AM review automation","Start automated performance tracking"],
+     "actions":["Deploy submittal → Sheet → client email draft via Zapier (AM review) using Gmail","Institute escalation paths (aging reqs, stalled interviews, offer delays) in Slack","Publish Light P&P Guide (submission rules, SLAs, comms standards, data hygiene)","Launch dashboard v1 using Sheets charts / Looker Studio; cohort trends","Add Apps Script validation and conditional formatting to catch missing or invalid data","Pilot \"rapid response\" pods for #1 Jobs (AM + 2 recruiters)"],
+     "deliverables":["Zapier Automation v2: Submittal → Client Draft with AM Review (Gmail)","Policies & Procedures v1.0","Performance Dashboard v1 (weekly and MTD views)"],
+     "artifacts":["Client Email Draft Template (auto-filled)","Escalation Matrix and SLA Ladder (Slack channels and tags)","Recruiter Scorecard (activity and quality)"],
+     "owners":["Ops Lead: automations, dashboard, SOPs","AMs: client comms, prioritization","Recruiters: data quality, SLA adherence"],
+     "slas":["AM review of client draft ≤ 4 business hours","Data hygiene flags resolved within 24h","Aging #1 Job escalated at 5 business days"],
+     "systems":["Zapier (Submittal → Client Draft plus AM review)","Gmail (client draft and send)","Google Sheets and Looker Studio (Dashboard v1)","Apps Script (validation rules and conditional formatting)","Slack (escalations, pod coordination)"],
+     "training":["Live workflow walkthroughs (recorded)","P&P guide snackable summaries","Dashboard reading: how to use metrics in 1:1s","Zapier troubleshooting and error resolution"],
+     "milestones":["Week 5: Zapier v2 live","Week 6: SOPs published; training complete","Week 8: First dashboard trend review"],
+     "kpis":["≥90% of submittals logged via automated workflow","Client email automation fully adopted by AMs","Weekly dashboard distributed","Submittals +15–20% vs 30-day baseline"]},
+    {"id":"p90","iconKey":"gauge","window":"61–90 Days","label":"Optimization & Scalability","gradient":"linear-gradient(135deg, #10B981, #14B8A6)",
+     "objectives":["Focus the roster on high performers","Stabilize automations to cover 80–90% of ops","Shift from activity volume to outcome quality"],
+     "actions":["Quarterly performance reviews using ratios and win rates by role and client","Reassign top recruiters to highest-impact reqs; exit persistently low performers","Zapier SLA nudges and status notifications to recruiters in Slack","Monthly operating review with leadership; root-cause and experiment backlog","Introduce quality gates: HM feedback loop via Google Forms; rejection taxonomy in Sheet","Implement interview prep and candidate QA checklist to lift interview to offer rate"],
+     "deliverables":["Roster Optimization Plan (retain, redeploy, exit)","Ops Review Pack (metrics, insights, actions)","Quality Gate Checklists and Feedback Forms","Zapier Monitor: error log and retry rules"],
+     "artifacts":["Experiment Tracker (hypothesis, owner, metric, outcome)","SLA Nudge Templates (Zapier → Slack)","HM Feedback Form (Google Forms)"],
+     "owners":["Ops Lead: performance analytics, roster decisions","AMs: client signal, priority shifts","Recruiters: quality improvements, prep adherence"],
+     "slas":["Status updates on #1 Jobs daily","HM feedback returned ≤ 48h","Interview prep checklist completed for 100% of scheduled interviews"],
+     "systems":["Zapier (monitors, error handling, SLA nudges)","Apps Script (retry jobs, scheduled QA audits)","Google Forms (HM feedback)","Looker Studio (quality and conversion views)","Slack (status notifications)"],
+     "training":["Coaching on ratios: how to improve funnel quality","Interview prep best practices","Using HM feedback to refine sourcing","Zapier runbook for ops and AMs"],
+     "milestones":["Week 10: Roster optimization decisions","Week 12: Quality gates live; first impact review","End of Q: ROI mini-report to leadership"],
+     "kpis":["Reduce low-performers by 20–30%","Time-to-submit reduced about 25% vs baseline","Submittal to Interview ratio improved 10–15%","Quarterly impact report delivered (measurable ROI)"]},
+    {"id":"p180","iconKey":"bar","window":"6 Months","label":"Scale & Strategic Impact","gradient":"linear-gradient(135deg, #F59E0B, #F97316)",
+     "objectives":["Lean, automated, and scalable recruiting engine","Consolidate to a proven core team","Provide clear ROI and growth roadmap"],
+     "actions":["Finalize proven roster; formalize advancement model and compensation bands","6-month ROI analysis (time and cost savings, delivery speed, fill ratios)","Dashboard v2 in Looker Studio: client-facing KPIs (time-to-fill, cost-per-hire, fill percent, NPS)","12-month roadmap: capacity model, hiring plan, enablement calendar, tech stack options"],
+     "deliverables":["Core Team Charter (roles, SLAs, capacity model)","ROI Report (exec summary plus appendix)","Dashboard v2 (leadership and client views in Looker Studio)","12-Month Roadmap and Budget Options"],
+     "artifacts":["Career Ladder and Competency Matrix","Capacity and Throughput Calculator (Sheets)","Client Review Template (QBR pack) in Slides","Automation Status Page (Google Sites or Sheet-backed)"],
+     "owners":["Ops Lead: roadmap, budget, analytics","Leadership: org decisions, investment choices","AMs: client QBRs, feedback loop"],
+     "slas":["Time-to-fill improved at least 20–30% vs baseline","Client NPS at least 8.5 out of 10 for top accounts","Automation uptime at least 99%"],
+     "systems":["Looker Studio (v2 dashboards)","Google Drive Template Library (SOPs, slides)","Google Sites or Sheet-backed status page","Slack (QBR reminders, KPI alerts)"],
+     "training":["Enablement calendar (quarterly)","Leadership metrics readouts","Advanced sourcing and interview skills refreshers"],
+     "milestones":["Month 5: v2 dashboards and pilot QBRs","Month 6: ROI report delivered; roadmap approved","Ops Director transition plan (if desired)"],
+     "kpis":["Core high-performer roster finalized","At least 90% operational workflows automated","Placement volume up 30–40% vs baseline","ROI report approved; next-phase roadmap aligned"]}
+  ];
+
+  const EXTRAS_TEMPLATE = {
+    success: [
+      "Lean core roster of proven recruiters; advancement framework in place",
+      "At least 90% of operational workflows automated end-to-end",
+      "Placement volume up 30–40% vs baseline; improved time-to-fill",
+      "ROI analysis demonstrates measurable time and cost savings and client delivery gains"
+    ],
+    risks: [
+      "Adoption — Reinforce with short trainings, office hours, and weekly dashboards",
+      "Data Quality — Lock permissions; automate input via forms; periodic audits",
+      "Tooling — Stage rollouts; maintain rollback paths; document SOPs",
+      "Capacity — Prioritize #1 Jobs; rotate lower-value work off core performers"
+    ],
+    metrics: {
+      activity: [
+        "Submittals per Week: candidates sent to client per recruiter",
+        "Time-to-Submit: req live to first slate sent",
+        "Touchpoints: screens, interviews, follow-ups"
+      ],
+      quality: [
+        "Submittal to Interview: interviews ÷ submittals (target ≥ 1:3)",
+        "Interview to Offer: offers ÷ interviews (target ≥ 1:4)",
+        "Offer to Start: starts ÷ offers (target ≥ 85%)"
+      ],
+      efficiency: [
+        "Time-to-Fill: req open to start date",
+        "Cost per Hire: recruiter cost + tools ÷ starts",
+        "Automation Coverage: % steps executed automatically"
+      ],
+      hygiene: [
+        "Form Completion: required fields filled (target ≥ 95%)",
+        "Update Latency: status change recorded within 24h",
+        "Error Rate: automation failures per week (Zapier task errors, Apps Script logs)"
+      ]
+    }
+  };
+
+  const sanitizePhases = (arr)=> Array.isArray(arr)? arr.map(p=>({
+    ...p,
+    iconKey: p.iconKey || 'zap',
+    objectives: Array.isArray(p.objectives)? p.objectives:[],
+    actions: Array.isArray(p.actions)? p.actions:[],
+    deliverables: Array.isArray(p.deliverables)? p.deliverables:[],
+    artifacts: Array.isArray(p.artifacts)? p.artifacts:[],
+    owners: Array.isArray(p.owners)? p.owners:[],
+    slas: Array.isArray(p.slas)? p.slas:[],
+    systems: Array.isArray(p.systems)? p.systems:[],
+    training: Array.isArray(p.training)? p.training:[],
+    milestones: Array.isArray(p.milestones)? p.milestones:[],
+    kpis: Array.isArray(p.kpis)? p.kpis:[]
+  })).filter(p=>p && p.id && p.window && p.label) : TEMPLATE;
+
+  const sanitizeExtras = (x)=> {
+    const e = x && typeof x==='object' ? x : EXTRAS_TEMPLATE;
+    const m = e.metrics || {};
+    return {
+      success: Array.isArray(e.success)? e.success : EXTRAS_TEMPLATE.success,
+      risks: Array.isArray(e.risks)? e.risks : EXTRAS_TEMPLATE.risks,
+      metrics: {
+        activity: Array.isArray(m.activity)? m.activity : EXTRAS_TEMPLATE.metrics.activity,
+        quality: Array.isArray(m.quality)? m.quality : EXTRAS_TEMPLATE.metrics.quality,
+        efficiency: Array.isArray(m.efficiency)? m.efficiency : EXTRAS_TEMPLATE.metrics.efficiency,
+        hygiene: Array.isArray(m.hygiene)? m.hygiene : EXTRAS_TEMPLATE.metrics.hygiene
+      }
+    };
+  };
+
+  /* ====== STATE ====== */
+  let state = {
+    detailed: getBool('detailed', true),
+    slide: getBool('slide', false),
+    presenter: getBool('presenter', false),
+    edit: getBool('edit', false),
+    exportSafe:false,
+    fakeFullscreen:false,
+    msg:''
+  };
+  if(state.presenter) state.edit=false;
+
+  let phases = TEMPLATE;
+  let extras = EXTRAS_TEMPLATE;
+  let heads = { ...HEADS_DEFAULT };
+  let pageTitle = "AlphaHire Recruiting Operations Roadmap and KPIs";
+
+  try{ const saved = localStorage.getItem(STORAGE_KEY); if(saved){ phases = sanitizePhases(JSON.parse(saved)); } }catch{}
+  try{ const savedE = localStorage.getItem(EXTRAS_KEY); if(savedE){ extras = sanitizeExtras(JSON.parse(savedE)); } }catch{}
+  try{ const savedH = localStorage.getItem(HEADINGS_KEY); if(savedH){ heads = { ...heads, ...JSON.parse(savedH) }; } }catch{}
+  try{ const savedT = localStorage.getItem(TITLE_KEY); if(savedT){ pageTitle = savedT; } }catch{}
+
+  function save(){ try{
+    localStorage.setItem(STORAGE_KEY, stringify(phases));
+    localStorage.setItem(EXTRAS_KEY, stringify(extras));
+    localStorage.setItem(HEADINGS_KEY, stringify(heads));
+    localStorage.setItem(TITLE_KEY, pageTitle);
+  }catch{} }
+  function setMsg(m){ state.msg=m; render(); setTimeout(()=>{ if(qs('#msg')?.textContent===m){ qs('#msg').textContent=''; } }, 2000); }
+
+  function scanUnsupported(node){
+    const offenders=[];(function walk(el){ const cs=getComputedStyle(el);
+      [cs.backgroundImage,cs.backgroundColor,cs.color,cs.borderColor].filter(Boolean).forEach(p=>{ const s=String(p).toLowerCase(); if(s.includes('oklab')||s.includes('oklch')||s.includes('color-mix(')) offenders.push(p); });
+      Array.from(el.children).forEach(walk);
+    })(node);
+    return {found: offenders.length>0, offenders};
+  }
+
+  const icon = (key)=> ({zap:ICONS.zap,calendar:ICONS.calendar,gauge:ICONS.gauge,bar:ICONS.bar}[key]||ICONS.zap);
+  const dotBg = (g)=> `background:${g}`;
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  /* === Heading label renderer (editable when Edit is ON) === */
+function headingLabel(key, variant='sub'){
+  const val = heads[key] ?? key;
+
+  // Title variant for card headers (bigger, bold)
+  if (variant === 'title') {
+    if (state.edit && !state.presenter) {
+      return `<input type="text" data-action="edit-head" data-key="${key}"
+               value="${escapeHtml(val)}"
+               style="font-size:14px;font-weight:600;border:1px solid var(--border);padding:6px 8px;border-radius:8px">`;
+    }
+    return `<h3 class="card-t" style="font-weight:600">${escapeHtml(val)}</h3>`;
+  }
+
+  // Default: subheading variant (small, muted) for section labels inside cards
+  if (state.edit && !state.presenter) {
+    return `<input type="text" data-action="edit-head" data-key="${key}"
+             value="${escapeHtml(val)}"
+             class="muted"
+             style="font-size:12px;margin-bottom:4px;border:1px solid var(--border);padding:6px 8px;border-radius:8px">`;
+  }
+  return `<div class="muted" style="font-size:12px;margin-bottom:4px">${escapeHtml(val)}</div>`;
+}
+
+  function controls(){
+    return `
+      <div class="controls row">
+        <div>
+          ${state.edit && !state.presenter
+            ? `<input type="text" id="title-input" value="${escapeHtml(pageTitle)}"
+                style="border:1px solid var(--border);padding:6px 8px;border-radius:8px;font-weight:700;font-size:22px;width:min(820px,90vw)">
+               `
+            : `<h1 id="title-text">${escapeHtml(pageTitle)}</h1>`}
+          <div class="row" style="margin-top:8px">
+            <span class="badge">${ICONS.zap} Quick Wins</span>
+            <span class="badge">${ICONS.calendar} Process Control</span>
+            <span class="badge">${ICONS.gauge} Optimization</span>
+            <span class="badge">${ICONS.bar} Scale & ROI</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="row">
+            <span class="pill">Compact</span>
+            <label class="switch"><input id="tog-detailed" type="checkbox" ${state.detailed? 'checked':''}><span class="slider"></span></label>
+            <span class="pill">Detailed</span>
+          </div>
+          <div class="row">
+            <span class="pill">Slide</span>
+            <label class="switch"><input id="tog-slide" type="checkbox" ${state.slide? 'checked':''}><span class="slider"></span></label>
+          </div>
+          <div class="row">
+            <span class="pill">Presenter</span>
+            <label class="switch"><input id="tog-presenter" type="checkbox" ${state.presenter? 'checked':''}><span class="slider"></span></label>
+          </div>
+          ${state.presenter? '' : `
+          <div class="row">
+            <span class="pill">Edit</span>
+            <label class="switch"><input id="tog-edit" type="checkbox" ${state.edit? 'checked':''}><span class="slider"></span></label>
+          </div>`}
+          <button class="btn" id="btn-export">${ICONS.download} ${state.slide? 'Export Slide PDF':'Export PDF'}</button>
+          <button class="btn" id="btn-full">${ICONS.full} Fullscreen</button>
+          <button class="btn" id="btn-link">${ICONS.link} Copy Share Link</button>
+          ${state.presenter||!state.edit? '' : `
+          <button class="btn" id="btn-json-out">${ICONS.save} Export Data</button>
+          <button class="btn" id="btn-json-in">${ICONS.upload} Import</button>
+          <input id="file" type="file" accept="application/json" style="display:none">
+          <button class="btn" id="btn-reset">${ICONS.undo} Reset</button>`}
+        </div>
+      </div>
+      <div id="msg" class="muted" style="margin:8px 6px 0 6px;font-size:12px;min-height:16px">${state.msg||''}</div>
+    `;
+  }
+
+  function editableList(sectionKey, arr){
+    const canEdit = state.edit && !state.presenter;
+    let html = `<ul class="list">`;
+    (arr||[]).forEach((t,i)=>{
+      html += `<li>
+        ${canEdit? `
+          <div class="itm">
+            <input type="text" data-action="edit-any" data-seckey="${sectionKey}" data-idx="${i}" value="${escapeHtml(t)}" placeholder="Type bullet…" />
+            <button class="btn" data-action="move-any-up" data-seckey="${sectionKey}" data-idx="${i}">${ICONS.up}</button>
+            <button class="btn" data-action="move-any-down" data-seckey="${sectionKey}" data-idx="${i}">${ICONS.down}</button>
+            <button class="btn" data-action="remove-any" data-seckey="${sectionKey}" data-idx="${i}">${ICONS.trash}</button>
+          </div>` : `${t? escapeHtml(t): '<span class="muted">(empty)</span>'}`}
+      </li>`;
+    });
+    if(canEdit){
+      html += `<li class="print-hide"><button class="btn" data-action="add-any" data-seckey="${sectionKey}">${ICONS.plus} Add item</button></li>`;
+    }
+    html += `</ul>`;
+    return html;
+  }
+
+  function sectionList(phaseId, key, arr){
+    return editableList(`${phaseId}.${key}`, arr);
+  }
+
+  function cardPhase(p){
+    const compact = !state.detailed;
+    return `
+      <div class="phy ${compact? 'compact':''}">
+        <div class="card phase">
+          <div class="dotwrap"><div class="dot" style="${dotBg(p.gradient)}">${icon(p.iconKey)}</div></div>
+          <div class="card-h">
+            <div class="row" style="justify-content:space-between">
+              <div>${state.edit && !state.presenter ? `<input type="text" data-action="edit-title" data-phase="${p.id}" value="${escapeHtml(p.label)}" style="border:1px solid var(--border);padding:6px 8px;border-radius:8px;font-weight:600">` : `<h3 class="card-t" style="font-weight:600">${escapeHtml(p.label)}</h3>`}</div>
+              <div>${state.edit && !state.presenter ? `<input type="text" data-action="edit-window" data-phase="${p.id}" value="${escapeHtml(p.window)}" style="border:1px solid var(--border);padding:6px 8px;border-radius:8px;font-size:12px">` : `<span class="badge">${escapeHtml(p.window)}</span>`}</div>
+            </div>
+          </div>
+          <div class="card-c">
+            <div>${headingLabel('objectives')}${sectionList(p.id,'objectives',p.objectives)}</div>
+            ${state.detailed? `<div>${headingLabel('actions')}${sectionList(p.id,'actions',p.actions)}</div>`:''}
+            ${state.detailed? `<div>${headingLabel('deliverables')}${sectionList(p.id,'deliverables',p.deliverables)}</div>`:''}
+            ${state.detailed? `<div>${headingLabel('artifacts')}${sectionList(p.id,'artifacts',p.artifacts)}</div>`:''}
+            ${state.detailed? `<div>${headingLabel('owners')}${sectionList(p.id,'owners',p.owners)}</div>`:''}
+            ${state.detailed? `<div>${headingLabel('slas')}${sectionList(p.id,'slas',p.slas)}</div>`:''}
+            ${state.detailed? `<div>${headingLabel('systems')}${sectionList(p.id,'systems',p.systems)}</div>`:''}
+            ${state.detailed? `<div>${headingLabel('training')}${sectionList(p.id,'training',p.training)}</div>`:''}
+            <div>${headingLabel('kpis')}${sectionList(p.id,'kpis',p.kpis)}</div>
+            ${state.detailed? `<div>${headingLabel('milestones')}${sectionList(p.id,'milestones',p.milestones)}</div>`:''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+function extrasCard(){
+  return `
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+      <div class="card">
+        <div class="card-h">
+          ${headingLabel('successTitle','title')}
+        </div>
+        <div class="card-c">
+          ${editableList('success', extras.success)}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          ${headingLabel('risksTitle','title')}
+        </div>
+        <div class="card-c">
+          ${editableList('risks', extras.risks)}
+        </div>
+      </div>
+    </div>
+
+    ${state.detailed? `
+      <div class="card" style="margin-top:16px">
+        <div class="card-h">
+          ${headingLabel('metricsTitle','title')}
+        </div>
+        <div class="card-c grid" style="grid-template-columns:1fr 1fr;gap:16px">
+          <div>${headingLabel('activityTitle')}${editableList('metrics.activity', extras.metrics.activity)}</div>
+          <div>${headingLabel('qualityTitle')}${editableList('metrics.quality', extras.metrics.quality)}</div>
+          <div>${headingLabel('efficiencyTitle')}${editableList('metrics.efficiency', extras.metrics.efficiency)}</div>
+          <div>${headingLabel('hygieneTitle')}${editableList('metrics.hygiene', extras.metrics.hygiene)}</div>
+        </div>
+      </div>` : '' }
+  `;
+}
+
+  function slideView(){
+    return `
+      <div class="card" id="slide">
+        <div class="hl">
+          <div class="muted" style="color:rgba(255,255,255,.9)">Executive Overview</div>
+          <h2 style="margin:4px 0 0;font-size:20px;font-weight:600">Recruiting Ops Rebuild – 30/60/90 + 6-Month</h2>
+        </div>
+        <div class="card-c grid grid-4">
+          <div class="card">
+            <div class="card-h"><h3 class="card-t">Why This Works</h3></div>
+            <div class="card-c">
+              <div>• Automates low-value steps with Zapier + Google Workspace</div>
+              <div>• Adds control via #1 Jobs, SLAs, and clean data</div>
+              <div>• Focuses roster on high performers (prove → keep)</div>
+              <div>• Clear visibility with weekly dashboards and QBRs</div>
+            </div>
+          </div>
+          <div class="card" style="grid-column:span 2">
+            <div class="card-h"><h3 class="card-t">30 / 60 / 90 / 6-Month Highlights</h3></div>
+            <div class="card-c" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px">
+              ${phases.map(p=>`
+                <div>
+                  <div class="row" style="gap:6px"><div class="dot" style="${dotBg(p.gradient)};height:10px;width:10px;border-width:1px"></div><div style="font-weight:600">${escapeHtml(p.window)}</div></div>
+                  <ul class="list">
+                    <li>${escapeHtml(p.objectives[0]||'Add an objective…')}</li>
+                    <li>${escapeHtml(p.actions[0]||'Add an action…')}</li>
+                    <li>${escapeHtml(p.kpis[0]||'Add a KPI…')}</li>
+                  </ul>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><h3 class="card-t">Targets & Tooling</h3></div>
+            <div class="card-c">
+              <div style="font-size:12px">
+                <div style="font-weight:600;margin-bottom:6px">KPI Targets (initial)</div>
+                <ul class="list">
+                  <li>At least 80% reqs auto-flow to Slack and Sheets within 30 days</li>
+                  <li>At least 90% submittals via workflow by 60 days</li>
+                  <li>Time-to-submit reduced around 25% by 90 days</li>
+                  <li>Placement volume up 30–40% by month 6</li>
+                </ul>
+              </div>
+              <hr style="border:none;border-top:1px solid var(--border);margin:10px 0">
+              <div class="row" style="gap:6px;flex-wrap:wrap">
+                <span class="badge">Polymer</span><span class="badge">Zapier</span><span class="badge">Google Forms</span><span class="badge">Google Sheets</span><span class="badge">Gmail</span><span class="badge">Slack</span><span class="badge">Apps Script</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function roadmapView(){
+    return `
+      <div class="timeline" style="margin-top:10px">
+        <div class="strip">
+          ${phases.map(cardPhase).join('')}
+        </div>
+      </div>
+      ${extrasCard()}
+    `;
+  }
+
+  function render(){
+    setParams({ detailed: state.detailed, slide: state.slide, presenter: state.presenter, edit: state.edit });
+    document.title = pageTitle + ' (Standalone)';
+    const app = qs('#app');
+    app.classList.toggle('export-safe', state.exportSafe);
+    app.classList.toggle('fake-fullscreen', state.fakeFullscreen);
+    app.innerHTML = controls() + (state.slide? slideView(): roadmapView());
+    bindEvents();
+  }
+
+  /* Updaters: allow skipping render for smooth typing */
+  function updatePhaseList(phaseId, key, updater, opts={render:true}){
+    phases = phases.map(p=> p.id===phaseId? {...p, [key]: updater([...(p[key]||[])])}: p);
+    save(); if(opts.render) render();
+  }
+  function updateExtras(sectionKey, updater, opts={render:true}){
+    const parts = sectionKey.split('.');
+    const clone = JSON.parse(JSON.stringify(extras));
+    let ref = clone;
+    for(let i=0;i<parts.length-1;i++){ ref = ref[parts[i]]; }
+    const last = parts[parts.length-1];
+    ref[last] = updater([...(ref[last]||[])]);
+    extras = sanitizeExtras(clone); save(); if(opts.render) render();
+  }
+
+  function forceWhiteBg(fs){ try{ document.documentElement.style.backgroundColor = fs? '#ffffff':''; document.body.style.backgroundColor = fs? '#ffffff':''; }catch{} }
+
+  // Keep a single fullscreen handler
+  function onFullChange(){ const fs=!!document.fullscreenElement; forceWhiteBg(fs); if(!fs) state.fakeFullscreen=false; }
+  let fullBound = false;
+
+  function bindEvents(){
+    // toggle & button handlers – assigned (not added) so only one exists
+    const togDetailed = qs('#tog-detailed');
+    const togSlide    = qs('#tog-slide');
+    const togPresenter= qs('#tog-presenter');
+    const togEdit     = qs('#tog-edit');
+    const titleInput  = qs('#title-input');
+    const btnExport   = qs('#btn-export');
+    const btnFull     = qs('#btn-full');
+    const btnLink     = qs('#btn-link');
+    const btnOut      = qs('#btn-json-out');
+    const btnIn       = qs('#btn-json-in');
+    const fileEl      = qs('#file');
+    const btnReset    = qs('#btn-reset');
+    const appNode     = qs('#app');
+
+    if(togDetailed) togDetailed.onchange = (e)=>{ state.detailed = e.target.checked; render(); };
+    if(togSlide) togSlide.onchange = (e)=>{ state.slide = e.target.checked; render(); };
+    if(togPresenter) togPresenter.onchange = (e)=>{ state.presenter = e.target.checked; if(state.presenter) state.edit=false; render(); };
+    if(togEdit) togEdit.onchange = (e)=>{ state.edit = e.target.checked; render(); };
+
+    if(titleInput) titleInput.oninput = (e)=> { pageTitle = e.target.value; save(); };
+
+    if(btnExport) btnExport.onclick = exportPDF;
+    if(btnFull)   btnFull.onclick   = toggleFullscreen;
+    if(btnLink)   btnLink.onclick   = copyLink;
+
+    if(btnOut)  btnOut.onclick = ()=>{ const blob = new Blob([stringify(phases)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='roadmap_phases.json'; a.click(); URL.revokeObjectURL(a.href); setMsg('Exported current data to JSON.'); };
+    if(btnIn)   btnIn.onclick  = ()=> fileEl && fileEl.click();
+    if(fileEl)  fileEl.onchange= (e)=>{ const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const d=sanitizePhases(JSON.parse(r.result)); phases=d; save(); setMsg('Imported '+d.length+' phases from JSON.'); render(); }catch(err){ setMsg('Import failed: '+(err?.message||'Invalid JSON')); } }; r.readAsText(f); e.target.value=''; };
+    if(btnReset) btnReset.onclick = ()=>{ const ok=typeof confirm==='function'? confirm('Reset all bullets to the default template?'):true; if(!ok) return; phases=TEMPLATE; extras=EXTRAS_TEMPLATE; heads={...HEADS_DEFAULT}; pageTitle="AlphaHire Recruiting Operations Roadmap and KPIs"; save(); setMsg('Template reset to defaults.'); render(); };
+
+    // Delegated inputs inside content – assign once per render (not additive)
+    if(appNode) appNode.oninput = (e)=>{
+      const t=e.target; if(!(t && t.dataset)) return;
+
+      if(t.dataset.action==='edit-any'){
+        const { seckey, idx } = t.dataset; const i=parseInt(idx,10);
+        if(seckey.includes('.')){ // phase-based
+          const [pid,key] = seckey.split('.');
+          updatePhaseList(pid,key, arr=>{ arr[i]=t.value; return arr; }, {render:false});
+        } else { // extras
+          updateExtras(seckey, arr=>{ arr[i]=t.value; return arr; }, {render:false});
+        }
+      }
+      if(t.dataset.action==='edit-title'){ const pid=t.dataset.phase; phases=phases.map(p=> p.id===pid? {...p,label:t.value}:p); save(); }
+      if(t.dataset.action==='edit-window'){ const pid=t.dataset.phase; phases=phases.map(p=> p.id===pid? {...p,window:t.value}:p); save(); }
+      if(t.dataset.action==='edit-head'){ heads[t.dataset.key]=t.value; save(); }
+    };
+
+    // Delegated clicks inside content – assign (not add) so only one handler fires
+    if(appNode) appNode.onclick = (e)=>{
+      const b = e.target.closest('button'); if(!b) return;
+      const act = b.dataset.action; if(!act) return;
+      const idx = parseInt(b.dataset.idx||'-1',10);
+      const seckey = b.dataset.seckey;
+
+      if(['add-any','remove-any','move-any-up','move-any-down'].includes(act)){
+        if(seckey.includes('.')){ const [pid,key] = seckey.split('.'); // phase section
+          if(act==='add-any') updatePhaseList(pid,key, arr=>{ arr.push(''); return arr; }, {render:true});
+          if(act==='remove-any') updatePhaseList(pid,key, arr=>{ arr.splice(idx,1); return arr; }, {render:true});
+          if(act==='move-any-up') updatePhaseList(pid,key, arr=>{ if(idx>0){ [arr[idx-1],arr[idx]]=[arr[idx],arr[idx-1]]; } return arr; }, {render:true});
+          if(act==='move-any-down') updatePhaseList(pid,key, arr=>{ if(idx<arr.length-1){ [arr[idx+1],arr[idx]]=[arr[idx],arr[idx+1]]; } return arr; }, {render:true});
+        } else { // extras sections
+          if(act==='add-any') updateExtras(seckey, arr=>{ arr.push(''); return arr; }, {render:true});
+          if(act==='remove-any') updateExtras(seckey, arr=>{ arr.splice(idx,1); return arr; }, {render:true});
+          if(act==='move-any-up') updateExtras(seckey, arr=>{ if(idx>0){ [arr[idx-1],arr[idx]]=[arr[idx],arr[idx-1]]; } return arr; }, {render:true});
+          if(act==='move-any-down') updateExtras(seckey, arr=>{ if(idx<arr.length-1){ [arr[idx+1],arr[idx]]=[arr[idx],arr[idx+1]]; } return arr; }, {render:true});
+        }
+      }
+    };
+
+    // Fullscreen change – bind once across renders
+    if(!fullBound){
+      document.addEventListener('fullscreenchange', onFullChange);
+      fullBound = true;
+    }
+  }
+
+  async function exportPDF(){
+    const ref = state.slide? qs('#slide') : qs('#app');
+    const check = scanUnsupported(ref);
+    try{
+      if(check.found){ state.exportSafe=true; render(); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); setMsg('Preflight: export-safe mode enabled.'); }
+      const canvas = await html2canvas(ref, {scale:2, backgroundColor:'#ffffff'});
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf; const pdf = new jsPDF('l','pt','a4');
+      const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
+      const iw = canvas.width, ih = canvas.height; const ratio = Math.min(pageW/iw, pageH/ih);
+      const w = iw*ratio, h = ih*ratio; const x = (pageW-w)/2, y=(pageH-h)/2;
+      pdf.addImage(imgData,'PNG',x,y,w,h); pdf.save(state.slide? 'Staffing_Rebuild_Slide.pdf':'Staffing_Rebuild_Roadmap.pdf');
+    }catch(err){
+      setMsg('PDF export issue – opening Print dialog as fallback.');
+      setTimeout(()=> window.print && window.print(), 50);
+    }finally{
+      state.exportSafe=false; render();
+    }
+  }
+
+  async function toggleFullscreen(){
+    const el = document.documentElement;
+    try{
+      if(!document.fullscreenElement){
+        await (el.requestFullscreen? el.requestFullscreen(): document.documentElement.requestFullscreen());
+        document.documentElement.style.backgroundColor='#ffffff'; document.body.style.backgroundColor='#ffffff';
+        state.fakeFullscreen=false;
+      } else {
+        await document.exitFullscreen?.();
+        document.documentElement.style.backgroundColor=''; document.body.style.backgroundColor='';
+      }
+    }catch(err){
+      state.fakeFullscreen = !state.fakeFullscreen;
+      setMsg('Fullscreen fallback '+(state.fakeFullscreen?'enabled':'disabled'));
+      render();
+    }
+  }
+
+  async function copyLink(){
+    try{ await navigator.clipboard.writeText(location.href); setMsg('Link copied'); }
+    catch(e1){
+      try{
+        const ta=document.createElement('textarea'); ta.value=location.href; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); const ok=document.execCommand('copy'); document.body.removeChild(ta); if(ok){ setMsg('Link copied'); } else throw new Error('execCommand copy failed');
+      }catch(e2){ setMsg('Copy failed. Please copy manually: '+location.href); }
+    }
+  }
+
+  // Initial render
+  render();
+})();
+</script>
+</body>
+</html>
